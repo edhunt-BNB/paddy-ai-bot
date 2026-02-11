@@ -184,6 +184,10 @@
         .chat-container.search-active { display: none; }
         .usp-card { border-left: 3px solid #FFD54D; background: linear-gradient(135deg, #FFFEF0 0%, #FFF6D8 100%); }
         .usp-value { font-family: 'Barlow Condensed', sans-serif; font-size: 0.9rem; font-weight: 700; color: #4E2C1D; }
+        .refresh-btn { background: var(--bnb-rich-yellow); color: var(--bnb-brown); border: none; padding: 10px 22px; border-radius: 10px; cursor: pointer; font-family: var(--font-heading); font-size: 1rem; font-weight: 700; letter-spacing: 0.5px; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+        .refresh-btn:hover { background: #FFE180; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .refresh-btn:active { transform: translateY(0); }
+        .last-updated-bar { background: #3a1e12; color: rgba(255,255,255,0.6); font-size: 0.75rem; padding: 6px 40px; text-align: right; letter-spacing: 0.3px; }
         @media (max-width: 900px) {
             .main-layout { flex-direction: column; }
             .sidebar { width: 100%; min-width: 100%; border-right: none; border-bottom: 2px solid #eee; max-height: 200px; }
@@ -212,8 +216,10 @@
             <div class="stat-box"><div class="stat-value">5.8</div><div class="stat-label">Avg Score</div></div>
             <div class="stat-box"><div class="stat-value">15</div><div class="stat-label">Agents</div></div>
             <div class="stat-box"><div class="stat-value">2</div><div class="stat-label">Folders</div></div>
+            <button class="refresh-btn" onclick="location.reload(true)" title="Hard refresh to get latest data">🔄 Refresh</button>
         </div>
     </header>
+    <div class="last-updated-bar">Last updated: 11/02/2026 14:06 · <span id="time-ago"></span></div>
 
     <nav class="folder-tabs">
             <button class="folder-tab-btn active" onclick="showFolder('d2ms-recordings', this)" data-folder="d2ms-recordings">
@@ -34296,6 +34302,25 @@
             resultsContainer.classList.remove('active');
             chatContainer.classList.remove('search-active');
         }
+        // Time-ago updater
+        (function() {
+            const bar = document.querySelector('.last-updated-bar');
+            if (!bar) return;
+            const match = bar.textContent.match(/Last updated: (\d{2}\/\d{2}\/\d{4} \d{2}:\d{2})/);
+            if (!match) return;
+            const parts = match[1].split(/[\/\s:]/);
+            const updatedAt = new Date(parts[2], parts[1]-1, parts[0], parts[3], parts[4]);
+            function update() {
+                const diff = Math.floor((Date.now() - updatedAt) / 1000);
+                const el = document.getElementById('time-ago');
+                if (!el) return;
+                if (diff < 60) el.textContent = 'just now';
+                else if (diff < 3600) el.textContent = Math.floor(diff/60) + ' min ago';
+                else if (diff < 86400) el.textContent = Math.floor(diff/3600) + ' hour' + (Math.floor(diff/3600)>1?'s':'') + ' ago';
+                else el.textContent = Math.floor(diff/86400) + ' day' + (Math.floor(diff/86400)>1?'s':'') + ' ago';
+            }
+            update(); setInterval(update, 60000);
+        })();
     </script>
 </body>
 </html>
